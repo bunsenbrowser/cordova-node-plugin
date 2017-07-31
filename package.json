@@ -1,0 +1,11 @@
+{
+  "name": "cordova-node-plugin",
+  "version": "1.0.0",
+  "cordova": {
+    "id": "cordova-node-plugin",
+    "platforms": [
+      "android"
+    ]
+  },
+  "description": "Node.js in Cordova"
+}
