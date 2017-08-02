@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.content.BroadcastReceiver;
+import android.os.Environment;
 //import org.rti.rcd.NodeService;
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -89,7 +90,13 @@ public class NodeService extends CordovaPlugin {
         cordova.getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 Log.d(TAG, "Starting node. Wheeee!");
-                startNode("node");
+                String extPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+                // todo: remove hard-coded bunsen.
+                String jsPath =  extPath + "/bunsen/node";
+                // startNode("node");
+                String ipcPort = "9000";
+                startNode("node", jsPath, "" + ipcPort);
+                //startNode("node", jsPath);
                 callbackContext.success(); // Thread-safe.
             }
         });
