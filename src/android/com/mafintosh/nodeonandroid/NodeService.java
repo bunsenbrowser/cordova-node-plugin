@@ -87,10 +87,12 @@ public class NodeService extends CordovaPlugin {
 //      result = startServer(inputs, callbackContext);
 //        startService();
 //        onStartCommand();
-        cordova.getActivity().runOnUiThread(new Runnable() {
+        // cordova.getActivity().runOnUiThread(new Runnable() {
+        cordova.getThreadPool().execute(new Runnable() {
             public void run() {
                 Log.d(TAG, "Starting node. Wheeee!");
                 String extPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+                // String extPath = Environment.getDataDirectory().getAbsolutePath();
                 // todo: remove hard-coded bunsen.
                 String jsPath =  extPath + "/bunsen/node";
                 // startNode("node");
