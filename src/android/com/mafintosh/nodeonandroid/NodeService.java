@@ -21,6 +21,11 @@ import android.content.BroadcastReceiver;
 import android.os.Environment;
 //import org.rti.rcd.NodeService;
 import static android.content.Context.BIND_AUTO_CREATE;
+import android.content.res.AssetManager;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class NodeService extends CordovaPlugin {
@@ -47,9 +52,6 @@ public class NodeService extends CordovaPlugin {
     private static JSONObject defaultSettings = new JSONObject();
 
     private static final String TAG = "CordovaNodePlugin";
-
-    /** Common tag used for logging statements. */
-    private static final String LOGTAG = "CordovaNodePlugin";
 
     /** Cordova Actions. */
     private static final String ACTION_START_SERVER = "startServer";
@@ -82,17 +84,36 @@ public class NodeService extends CordovaPlugin {
 
   public boolean execute(String action, JSONArray inputs, final CallbackContext callbackContext) throws JSONException {
     PluginResult result = null;
-    Log.d(LOGTAG, String.format("ACTION_START_SERVER: %s", ACTION_START_SERVER));
+    Log.d(TAG, String.format("ACTION_START_SERVER: %s", ACTION_START_SERVER));
     if (ACTION_START_SERVER.equals(action)) {
 //      result = startServer(inputs, callbackContext);
 //        startService();
 //        onStartCommand();
-        cordova.getActivity().runOnUiThread(new Runnable() {
+        // cordova.getActivity().runOnUiThread(new Runnable() {
+        cordova.getThreadPool().execute(new Runnable() {
             public void run() {
                 Log.d(TAG, "Starting node. Wheeee!");
-                String extPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+                // String extPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+                // String extPath = Environment.getDataDirectory().getAbsolutePath();
+                Activity context = cordova.getActivity();
+                String cache = context.getCacheDir().getAbsolutePath();
                 // todo: remove hard-coded bunsen.
-                String jsPath =  extPath + "/bunsen/node";
+                //String jsPath =  extPath + "/bunsen/node";
+                String jsPath = cache + "/node";
+                String corePath = cache + "/node_modules";
+                AssetManager am = context.getAssets();
+                try {
+                String[] filelist = am.list("www/assets/");
+                  for (String name:filelist){
+                       System.out.println(name);
+                       Log.d(TAG, "Asset filename: " + name);
+                  }
+                 } catch (IOException e) {
+                    e.printStackTrace();
+                 }
+                copyAssets(am, "www/assets/node_modules", corePath);
+                copyAssets(am, "www/assets/node", jsPath);
+                Log.d(TAG, "jsPath: " + jsPath);
                 // startNode("node");
                 String ipcPort = "9000";
                 startNode("node", jsPath, "" + ipcPort);
@@ -107,7 +128,7 @@ public class NodeService extends CordovaPlugin {
 ////      result = stopServer(inputs, callbackContext);
 //        disableMode();
     } else {
-      Log.d(LOGTAG, String.format("Invalid action passed: %s", action));
+      Log.d(TAG, String.format("Invalid action passed: %s", action));
       result = new PluginResult(Status.INVALID_ACTION);
     }
 
@@ -262,6 +283,41 @@ public class NodeService extends CordovaPlugin {
         System.loadLibrary("native-lib");
     }
 
+
+    private static void copyAssets (AssetManager am, String src, String dest) {
+        try {
+            copyAssetFile(am, src, dest);
+        } catch (Exception e) {
+            try {
+                File dir = new File(dest);
+                dir.mkdir();
+            } catch (Exception e1) {}
+            try {
+                String[] files = am.list(src);
+                for (int i = 0; i < files.length; i++) {
+                    copyAssets(am, src + "/" + files[i], dest + "/" + files[i]);
+                }
+            } catch (Exception e2) {}
+        }
+    }
+
+    private static void copyAssetFile(AssetManager am, String src, String dest) throws IOException {
+        InputStream in = am.open(src);
+
+        File destFile = new File(dest);
+        if (!destFile.exists()) destFile.createNewFile();
+
+        FileOutputStream out = new FileOutputStream(dest);
+
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            out.write(buffer, 0, length);
+        }
+        in.close();
+        out.close();
+    }
+
 //    /**
 //     * Bind the activity to a background service and put them into foreground
 //     * state.
@@ -312,7 +368,7 @@ public class NodeService extends CordovaPlugin {
 
 //  // kudos: https://github.com/floatinghotpot/cordova-httpd/blob/master/src/android/CorHttpd.java#L52
 //  private PluginResult startServer(JSONArray inputs, CallbackContext callbackContext) {
-//    Log.w(LOGTAG, "startServer");
+//    Log.w(TAG, "startServer");
 //
 ////    JSONObject options = inputs.optJSONObject(0);
 ////    if(options == null) return null;
@@ -372,7 +428,7 @@ public class NodeService extends CordovaPlugin {
 //      }
 //    } catch (IOException e) {
 //      errmsg = String.format("IO Exception: %s", e.getMessage());
-//      Log.w(LOGTAG, errmsg);
+//      Log.w(TAG, errmsg);
 //    }
 //    return errmsg;
 //  }
