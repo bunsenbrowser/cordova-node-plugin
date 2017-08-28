@@ -279,7 +279,9 @@ public class NodeService extends CordovaPlugin {
     private native void startNode(String... app);
 
     static {
+        Log.d(TAG, "loading node lib: ");
         System.loadLibrary("node");
+        Log.d(TAG, "loading native-lib: ");
         System.loadLibrary("native-lib");
     }
 

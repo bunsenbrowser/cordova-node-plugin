@@ -27,5 +27,6 @@
       <source-file src="src/android/libs/armeabi/libnode.so" target-dir="libs/arm64-v8a" />
       <source-file src="src/android/libs/armeabi/libc++_shared.so" target-dir="libs/arm64-v8a" />
       <source-file src="src/android/libs/armeabi/libnative-lib.so" target-dir="libs/arm64-v8a" />
+      <source-file src="src/android/libs/armeabi-v7a/libnode.so.57" target-dir="libs/armeabi-v7a" />
     </platform>
 </plugin>
