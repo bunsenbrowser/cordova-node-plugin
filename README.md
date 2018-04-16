@@ -1,6 +1,10 @@
 cordova-node-plugin
 ===================
 
+DEPRECATED
+
+Use [nodejs-mobile-cordova](https://github.com/janeasystems/nodejs-mobile-cordova) instead.
+
 This Cordova plugin provides node to your Android device.
 Only works on Android devices that use ARM processors.
 
